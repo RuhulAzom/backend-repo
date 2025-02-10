@@ -6,7 +6,7 @@ const UserRoutes = express.Router();
 
 UserRoutes.post("/register", ApiController.register);
 UserRoutes.post("/login", ApiController.login);
-UserRoutes.post("/check-token", isAuthenticated, ApiController.checkToken);
+UserRoutes.get("/check-token", isAuthenticated, ApiController.checkToken);
 UserRoutes.get("/fetch-user-data", ApiController.fetchUserData);
 UserRoutes.put(
   "/update-user-data",

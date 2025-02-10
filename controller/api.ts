@@ -61,14 +61,20 @@ export default {
         ...userData,
       });
 
-      return sendResponse(res, 404, "Register is succesfully", user);
+      return sendResponse(res, 200, "Register is succesfully", user);
     } catch (error) {
       return sendResponse(res, 500, "Internal Server Error");
     }
   },
 
   checkToken: async (req: Request, res: Response): Promise<any> => {
-    return sendResponse(res, 200, "Authenticated!!", (req as any).user);
+    const user = await userRepository.findUserById((req as any).user.id);
+    if (!user) return sendResponse(res, 404, "User not found!");
+    return sendResponse(res, 200, "Authenticated!!", {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
   },
 
   fetchUserData: async (req: Request, res: Response): Promise<any> => {
@@ -84,9 +90,18 @@ export default {
     try {
       const { id, name, email } = req.body;
       if (!id) return sendResponse(res, 404, "Id is required");
+
+      if (!name || !email) return sendResponse(res, 404, "Data is missing");
+
       const findUser = await userRepository.findUserById(id);
       if (!findUser) return sendResponse(res, 404, "User not found");
+
+      const checkEmail = await userRepository.findUserByEmail(email);
+      if (checkEmail && checkEmail.id !== id)
+        return sendResponse(res, 404, "Email is already in used");
+
       await userRepository.update({ id, data: { name, email } });
+
       return sendResponse(res, 200, "Succesfully update user data");
     } catch (error) {
       console.log({ error });

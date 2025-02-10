@@ -42,6 +42,7 @@ export const findUserByEmail = async (email: string) => {
   doc.forEach((item) => {
     const userData = item.data();
     data.push({
+      id: item.id,
       ...userData,
       createdAt: new Date(userData.createdAt._seconds * 1000),
       updatedAt: new Date(userData.updatedAt._seconds * 1000),
@@ -54,7 +55,10 @@ export const findUserByEmail = async (email: string) => {
 export const findUserById = async (id: string) => {
   const doc = await collection.doc(id).get();
   if (!doc) return null;
-  return doc.data() as User;
+  return {
+    id: doc.id,
+    ...doc.data(),
+  } as User;
 };
 
 export const findAll = async () => {
@@ -63,7 +67,7 @@ export const findAll = async () => {
   doc.forEach((item) => {
     const userData = item.data();
     data.push({
-      id: userData.id,
+      id: item.id,
       name: userData.name,
       email: userData.email,
       createdAt: new Date(userData.createdAt._seconds * 1000),
@@ -87,4 +91,25 @@ export const update = async ({
     updatedAt: now,
   });
   return findUserById(id);
+};
+
+export const findTopUsers = async (): Promise<User[]> => {
+  const doc = await collection
+    .orderBy("totalAverageWeightRatings", "desc")
+    .orderBy("numberOfRents", "desc")
+    .orderBy("recentlyActive", "desc")
+    .limit(10)
+    .get();
+  if (!doc) return [];
+  let data: User[] = [];
+  doc.forEach((item) => {
+    const userData = item.data();
+    data.push({
+      id: item.id,
+      ...userData,
+      createdAt: new Date(userData.createdAt._seconds * 1000),
+      updatedAt: new Date(userData.updatedAt._seconds * 1000),
+    } as User);
+  });
+  return data;
 };

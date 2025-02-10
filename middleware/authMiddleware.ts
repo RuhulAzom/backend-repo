@@ -10,12 +10,15 @@ export const isAuthenticated = async (
   next: NextFunction
 ): Promise<any> => {
   try {
+    console.log(req.headers);
     if (!req.headers)
       return res.status(401).json({
+        status: 401,
         message: "Unauthorized",
       });
     if (!req.headers.authorization)
       return res.status(401).json({
+        status: 401,
         message: "Unauthorized",
       });
 
@@ -24,6 +27,7 @@ export const isAuthenticated = async (
 
     if (!secretKey)
       return res.status(404).json({
+        status: 404,
         message: "Secret key not found",
       });
 
@@ -35,6 +39,7 @@ export const isAuthenticated = async (
 
     if (!userData)
       return res.status(401).json({
+        status: 401,
         message: "Unauthorized",
       });
 
